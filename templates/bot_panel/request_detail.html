@@ -1,0 +1,45 @@
+{% extends "bot_panel/base.html" %}
+{% block title %}جزئیات درخواست #{{ bot_request.id }}{% endblock %}
+{% block content %}
+<div class="card">
+    <h1>درخواست #{{ bot_request.id }} - {{ bot_request.title }}</h1>
+    <p><span class="badge {{ bot_request.status_css_class }}">{{ bot_request.get_status_display }}</span></p>
+    <p class="muted">{{ bot_request.user_friendly_status }}</p>
+</div>
+<div class="grid-2">
+    <div class="card">
+        <h2>اطلاعات درخواست</h2>
+        <p><strong>ربات:</strong> {{ bot_request.bot.name }}</p>
+        <p><strong>نوع عملیات:</strong> {{ bot_request.command_template.title }}</p>
+        <p><strong>ثبت‌کننده:</strong> {{ bot_request.requested_by.get_username }}</p>
+        <p><strong>تاریخ ثبت:</strong> {{ bot_request.created_at|date:"Y/m/d H:i" }}</p>
+    </div>
+    <div class="card">
+        <h2>توضیح کاربر</h2>
+        <p>{{ bot_request.user_message|linebreaksbr }}</p>
+        {% if bot_request.input_payload %}<pre>{{ bot_request.input_payload }}</pre>{% endif %}
+    </div>
+</div>
+<div class="card">
+    <h2>نتیجه</h2>
+    {% if bot_request.result_summary %}<p>{{ bot_request.result_summary|linebreaksbr }}</p>
+    {% elif bot_request.error_message_for_user %}<p>{{ bot_request.error_message_for_user|linebreaksbr }}</p>
+    {% else %}<p class="muted">هنوز نتیجه‌ای ثبت نشده است.</p>{% endif %}
+</div>
+<div class="card">
+    <h2>گزارش قابل مشاهده</h2>
+    {% for log in bot_request.logs.all %}
+        <div class="card">
+            <p><span class="badge status-pending">{{ log.get_level_display }}</span> <span class="muted">{{ log.created_at|date:"Y/m/d H:i" }}</span></p>
+            <p>{{ log.message|linebreaksbr }}</p>
+            {% if can_view_technical_logs and log.technical_message %}
+                <h4>جزئیات فنی</h4>
+                <pre class="technical">{{ log.technical_message }}</pre>
+            {% endif %}
+        </div>
+    {% empty %}<p class="muted">هنوز گزارشی ثبت نشده است.</p>{% endfor %}
+</div>
+{% if can_view_technical_logs and bot_request.technical_error %}
+<div class="card"><h2>خطای فنی درخواست</h2><pre class="technical">{{ bot_request.technical_error }}</pre></div>
+{% endif %}
+{% endblock %}
