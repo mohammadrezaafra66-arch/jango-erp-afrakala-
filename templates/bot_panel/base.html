@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}پنل ربات‌های افراکالا{% endblock %}</title>
+    <style>
+        body { margin: 0; font-family: Tahoma, Arial, sans-serif; background: #f7f7fb; color: #1f2937; line-height: 1.8; }
+        a { color: #2563eb; text-decoration: none; }
+        .topbar { background: #111827; color: white; padding: 14px 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .topbar a { color: white; margin-inline-start: 12px; }
+        .brand { font-weight: 700; }
+        .container { width: min(1180px, calc(100% - 32px)); margin: 24px auto; }
+        .card { background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 8px 20px rgba(15, 23, 42, .04); }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        @media (max-width: 900px) { .grid, .grid-2 { grid-template-columns: 1fr; } }
+        .metric { font-size: 28px; font-weight: 700; }
+        .muted { color: #6b7280; }
+        .btn { display: inline-block; background: #2563eb; color: white; padding: 10px 16px; border-radius: 10px; border: 0; font-family: inherit; cursor: pointer; }
+        .secondary { background: #374151; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #e5e7eb; padding: 12px; text-align: right; vertical-align: top; }
+        th { background: #f9fafb; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+        .status-pending { background: #fef3c7; color: #a16207; }
+        .status-running { background: #dbeafe; color: #1d4ed8; }
+        .status-success { background: #dcfce7; color: #15803d; }
+        .status-failed { background: #fee2e2; color: #b91c1c; }
+        .status-needs-review { background: #ffedd5; color: #c2410c; }
+        .status-cancelled { background: #e5e7eb; color: #4b5563; }
+        label { display: block; font-weight: 700; margin-bottom: 6px; }
+        input, select, textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 14px; }
+        .helptext { color: #6b7280; font-size: 13px; }
+        .errorlist { color: #b91c1c; }
+        .messages { padding: 0; list-style: none; }
+        .messages li { background: #ecfdf5; border: 1px solid #bbf7d0; padding: 10px 12px; border-radius: 10px; margin-bottom: 8px; }
+        .technical { background: #111827; color: #e5e7eb; padding: 12px; border-radius: 12px; direction: ltr; text-align: left; overflow-x: auto; }
+    </style>
+</head>
+<body>
+<header class="topbar">
+    <div class="brand">پنل ربات‌های افراکالا</div>
+    <nav>
+        <a href="{% url 'bot_panel:dashboard' %}">داشبورد</a>
+        <a href="{% url 'bot_panel:agent_list' %}">ربات‌ها</a>
+        <a href="{% url 'bot_panel:request_list' %}">درخواست‌ها</a>
+        <a href="{% url 'bot_panel:request_create' %}">ثبت درخواست</a>
+        {% if request.user.is_staff %}<a href="{% url 'admin:index' %}">ادمین</a>{% endif %}
+    </nav>
+</header>
+<main class="container">
+    {% if messages %}<ul class="messages">{% for message in messages %}<li>{{ message }}</li>{% endfor %}</ul>{% endif %}
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>
