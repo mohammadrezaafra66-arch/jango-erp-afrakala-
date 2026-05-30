@@ -1,0 +1,32 @@
+{% extends "bot_panel/base.html" %}
+{% block title %}لیست درخواست‌ها{% endblock %}
+{% block content %}
+<div class="card">
+    <h1>درخواست‌های ربات‌ها</h1>
+    <p class="muted">کاربر عادی فقط درخواست‌های خودش را می‌بیند. ادمین همه درخواست‌ها را می‌بیند.</p>
+    <a class="btn" href="{% url 'bot_panel:request_create' %}">ثبت درخواست جدید</a>
+</div>
+<div class="card">
+{% if bot_requests %}
+<table>
+    <thead><tr><th>شماره</th><th>عنوان</th><th>ربات</th><th>نوع عملیات</th><th>ثبت‌کننده</th><th>وضعیت</th><th>تاریخ</th><th></th></tr></thead>
+    <tbody>
+    {% for item in bot_requests %}
+    <tr>
+        <td>#{{ item.id }}</td>
+        <td>{{ item.title }}</td>
+        <td>{{ item.bot.name }}</td>
+        <td>{{ item.command_template.title }}</td>
+        <td>{{ item.requested_by.get_username }}</td>
+        <td><span class="badge {{ item.status_css_class }}">{{ item.get_status_display }}</span></td>
+        <td>{{ item.created_at|date:"Y/m/d H:i" }}</td>
+        <td><a href="{{ item.get_absolute_url }}">مشاهده</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="muted">هنوز درخواستی ثبت نشده است.</p>
+{% endif %}
+</div>
+{% endblock %}
