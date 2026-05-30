@@ -1,0 +1,16 @@
+{% extends "bot_panel/base.html" %}
+{% block title %}ثبت درخواست ربات{% endblock %}
+{% block content %}
+<div class="card">
+    <h1>ثبت درخواست جدید</h1>
+    <p class="muted">درخواست را با زبان ساده بنویسید. نیازی به API، کد یا متن فنی نیست.</p>
+</div>
+<div class="card">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn" type="submit">ثبت درخواست</button>
+        <a class="btn secondary" href="{% url 'bot_panel:request_list' %}">انصراف</a>
+    </form>
+</div>
+{% endblock %}
