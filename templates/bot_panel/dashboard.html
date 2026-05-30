@@ -1,0 +1,37 @@
+{% extends "bot_panel/base.html" %}
+{% block title %}داشبورد ربات‌ها{% endblock %}
+{% block content %}
+<div class="card">
+    <h1>داشبورد ربات‌ها</h1>
+    <p class="muted">وضعیت کلی درخواست‌های ربات‌ها را ساده و قابل فهم ببینید.</p>
+    <a class="btn" href="{% url 'bot_panel:request_create' %}">ثبت درخواست جدید</a>
+</div>
+<div class="grid">
+    <div class="card"><div class="muted">ربات‌های فعال</div><div class="metric">{{ active_bot_count }}</div></div>
+    <div class="card"><div class="muted">در انتظار اجرا</div><div class="metric">{{ pending_count }}</div></div>
+    <div class="card"><div class="muted">موفق</div><div class="metric">{{ success_count }}</div></div>
+    <div class="card"><div class="muted">ناموفق</div><div class="metric">{{ failed_count }}</div></div>
+</div>
+<div class="card">
+    <h2>آخرین درخواست‌ها</h2>
+    {% if latest_requests %}
+    <table>
+        <thead><tr><th>شماره</th><th>عنوان</th><th>ربات</th><th>وضعیت</th><th>تاریخ</th><th></th></tr></thead>
+        <tbody>
+        {% for item in latest_requests %}
+            <tr>
+                <td>#{{ item.id }}</td>
+                <td>{{ item.title }}</td>
+                <td>{{ item.bot.name }}</td>
+                <td><span class="badge {{ item.status_css_class }}">{{ item.get_status_display }}</span></td>
+                <td>{{ item.created_at|date:"Y/m/d H:i" }}</td>
+                <td><a href="{{ item.get_absolute_url }}">جزئیات</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="muted">هنوز درخواستی ثبت نشده است.</p>
+    {% endif %}
+</div>
+{% endblock %}
