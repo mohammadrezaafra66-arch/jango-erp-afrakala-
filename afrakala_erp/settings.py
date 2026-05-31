@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "catalog",
     "pricing",
     "bots",
+    "bot_panel",
 ]
 
 MIDDLEWARE = [
