@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import os
 import sys
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +32,16 @@ def _candidate_bot_paths(input_payload: dict) -> list[Path]:
     ]
 
     return [path for path in explicit_paths + fallback_paths if path is not None]
+
+
+@contextmanager
+def _working_directory(path: Path) -> Iterator[None]:
+    previous = Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(previous)
 
 
 def _add_market_data_bot_to_pythonpath(input_payload: dict) -> Path:
@@ -113,10 +124,15 @@ def run(input_payload: dict, user_message: str, context: dict | None = None) -> 
         ) from exc
 
     config_path = _find_market_data_config(input_payload, bot_path=bot_path)
-    payload: dict[str, Any] = run_once(config_path)
+    include_snapshots = bool(input_payload.get("include_snapshots", False))
+
+    # Run from the external bot repository so relative paths inside its config
+    # such as data/market_data.db and output/ resolve in the expected project.
+    with _working_directory(bot_path):
+        payload: dict[str, Any] = run_once(config_path)
+
     snapshots = payload.get("snapshots", [])
     meta = payload.get("meta", {})
-    include_snapshots = bool(input_payload.get("include_snapshots", False))
 
     data: dict[str, Any] = {
         "mode": "real_run",
