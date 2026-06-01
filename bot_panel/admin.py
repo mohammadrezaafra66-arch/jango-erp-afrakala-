@@ -1,8 +1,24 @@
 from django.contrib import admin, messages
 from django.utils import timezone
+from django.utils.html import format_html
 
 from .models import BotAgent, BotCommandTemplate, BotRequest, BotRunLog
 from .services import run_bot_request
+
+
+INPUT_PAYLOAD_HELP = """
+نمونه تست امن ربات نرخ‌ها:
+{
+  "dry_run": true
+}
+
+نمونه اجرای واقعی ربات نرخ‌ها:
+{
+  "dry_run": false,
+  "bot_path": "C:\\Users\\AFRA\\Desktop\\dollar-tehran-bot",
+  "include_snapshots": false
+}
+"""
 
 
 @admin.register(BotAgent)
@@ -36,12 +52,13 @@ class BotRequestAdmin(admin.ModelAdmin):
         "command_template",
         "requested_by",
         "status",
+        "short_result_summary",
         "created_at",
         "started_at",
         "finished_at",
     )
     list_filter = ("status", "bot", "command_template", "created_at")
-    search_fields = ("title", "user_message", "requested_by__username", "bot__name")
+    search_fields = ("title", "user_message", "requested_by__username", "bot__name", "result_summary")
     readonly_fields = (
         "created_at",
         "updated_at",
@@ -50,9 +67,77 @@ class BotRequestAdmin(admin.ModelAdmin):
         "result_summary",
         "error_message_for_user",
         "technical_error",
+        "payload_examples",
+    )
+    fieldsets = (
+        (
+            "مشخصات درخواست",
+            {
+                "fields": (
+                    "requested_by",
+                    "bot",
+                    "command_template",
+                    "title",
+                    "user_message",
+                    "status",
+                )
+            },
+        ),
+        (
+            "ورودی بات",
+            {
+                "fields": (
+                    "payload_examples",
+                    "input_payload",
+                ),
+                "description": "ورودی بات باید JSON معتبر باشد. برای اجرای روزمره، اول با dry_run تست کنید.",
+            },
+        ),
+        (
+            "نتیجه اجرا",
+            {
+                "fields": (
+                    "user_friendly_status",
+                    "result_summary",
+                    "error_message_for_user",
+                    "technical_error",
+                    "started_at",
+                    "finished_at",
+                )
+            },
+        ),
+        (
+            "زمان‌ها",
+            {
+                "fields": (
+                    "created_at",
+                    "updated_at",
+                ),
+                "classes": ("collapse",),
+            },
+        ),
     )
     actions = ("run_selected_requests", "reset_selected_requests_to_pending")
     inlines = [BotRunLogInline]
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name == "input_payload":
+            formfield.help_text = INPUT_PAYLOAD_HELP
+        return formfield
+
+    @admin.display(description="نمونه payload")
+    def payload_examples(self, obj=None):
+        return format_html(
+            "<pre style='white-space: pre-wrap; direction: ltr; text-align: left; background: #f6f8fa; padding: 12px; border-radius: 6px;'>{}</pre>",
+            INPUT_PAYLOAD_HELP,
+        )
+
+    @admin.display(description="خلاصه نتیجه")
+    def short_result_summary(self, obj):
+        if not obj.result_summary:
+            return "-"
+        return obj.result_summary[:80] + ("..." if len(obj.result_summary) > 80 else "")
 
     def save_model(self, request, obj, form, change):
         if not change and not obj.requested_by_id:
